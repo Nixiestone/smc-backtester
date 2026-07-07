@@ -1,0 +1,11 @@
+[project]
+name = "smc-backtester"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "backtesting>=0.6.5",
+    "matplotlib>=3.11.0",
+    "pandas>=3.0.3",
+]
