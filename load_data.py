@@ -1,6 +1,6 @@
 """
 load_data.py
-Stage 1 of the Nixie SMC backtester: get the price data into Python, cleanly.
+Stage 1 of the Nixie's SMC backtester: get the price data into Python, cleanly.
 
 What this script does, in plain English:
   1. Peeks at the raw CSV so we SEE its exact format before trusting it.
@@ -45,7 +45,8 @@ print("-" * 60)
 #   - date & time already in ONE column? see the note under section 4.
 df = pd.read_csv(
     CSV_PATH,
-    header=None,                                             # file has no column-name row
+    sep=r"\s+",                                             # columns are split by WHITESPACE (tabs/spaces), not commas
+    header=None,                                            # file has no column-name row
     names=["date", "time", "Open", "High", "Low", "Close", "Volume"],  # so we name them
 )
 
@@ -53,8 +54,8 @@ df = pd.read_csv(
 # datetime objects. The format string must match your file EXACTLY:
 #   %Y = 4-digit year, %m = month, %d = day, %H = 24h hour, %M = minute
 df["Datetime"] = pd.to_datetime(
-    df["date"] + " " + df["time"],
-    format="%Y.%m.%d %H:%M",
+    df["date"].astype(str) + " " + df["time"].astype(str),  # .astype(str) dodges pandas 3.0 Arrow-string quirks
+    format="%Y-%m-%d %H:%M",                                # DASHES, matching your file (2022-04-12 19:00)
 )
 # NOTE: if your file has ONE datetime column instead of two, delete the two
 # lines above and instead do:
@@ -65,6 +66,7 @@ df["Datetime"] = pd.to_datetime(
 # ---------------------------------------------------------------------------
 df = df.set_index("Datetime")                          # timestamp becomes the row index
 df = df[["Open", "High", "Low", "Close", "Volume"]]    # keep only what we need, in order
+df = df.astype(float)                                  # force real numbers (not Arrow strings) so later math is predictable
 df = df.sort_index()                                   # oldest candle first, guaranteed
 
 # ---------------------------------------------------------------------------
